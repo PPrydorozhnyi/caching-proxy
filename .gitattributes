@@ -1,0 +1,2 @@
+# Prevent executables from being modified by Git
+bin/* binary
