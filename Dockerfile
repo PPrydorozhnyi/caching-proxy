@@ -12,7 +12,7 @@ COPY ./src ./
 
 # Build sources
 #todo optimize build with flags like -ldflags '-w -s' -a
-RUN CGO_ENABLED=0 GOOS=linux go build -o myapp
+RUN CGO_ENABLED=0 go build -o myapp
 
 ###
 ## Step 2: Runtime stage
