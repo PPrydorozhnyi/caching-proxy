@@ -44,8 +44,14 @@ jobs:
 
     - name: Install lint/vuln tools
       run: |
-        go install honnef.co/go/tools/cmd/staticcheck@latest
-        go install golang.org/x/vuln/cmd/govulncheck@latest
+        go install honnef.co/go/tools/cmd/staticcheck@0.6.1
+        go install golang.org/x/vuln/cmd/govulncheck@1.1.4
+
+    - name: Cache Go tools (GOPATH/bin)
+      uses: actions/cache@v4
+      with:
+        path: ~/go/bin
+        key: ${{ runner.os }}-gotools-go1.25-staticcheck-0.6.1-govulncheck-1.1.4
 
     - name: Staticcheck
       run: staticcheck ./...
