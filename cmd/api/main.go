@@ -1,23 +1,35 @@
 package main
 
 import (
+	"caching-proxy/config"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	http.HandleFunc("/", indexHandler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("Defaulting to port %s", port)
+
+	c := config.New()
+
+	mux := http.NewServeMux()
+
+	s := &http.Server{
+		Addr:         fmt.Sprintf(":%d", c.Server.Port),
+		Handler:      mux,
+		ReadTimeout:  c.Server.Timeout.Read,
+		WriteTimeout: c.Server.Timeout.Write,
+		IdleTimeout:  c.Server.Timeout.Idle,
 	}
 
-	log.Printf("Listening on port %s", port)
-	log.Printf("Open http://localhost:%s in the browser", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	mux.HandleFunc("/", indexHandler)
+
+	log.Info().Msgf("Starting server on port %d", c.Server.Port)
+
+	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Fatal().Err(err).Msg("Failed to start server")
+	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
