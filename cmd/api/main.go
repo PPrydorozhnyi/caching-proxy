@@ -2,6 +2,7 @@ package main
 
 import (
 	"caching-proxy/config"
+	"caching-proxy/logging"
 	"errors"
 	"fmt"
 	"net/http"
@@ -12,6 +13,8 @@ import (
 func main() {
 
 	c := config.New()
+	logging.InitGlobalLogger(&c.Log)
+	log.Error().Msgf("Config: %+v", c)
 
 	mux := http.NewServeMux()
 
