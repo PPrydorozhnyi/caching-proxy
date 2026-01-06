@@ -13,8 +13,7 @@ import (
 func main() {
 
 	c := config.New()
-	logging.InitGlobalLogger(&c.Log)
-	log.Error().Msgf("Config: %+v", c)
+	logging.ConfigureLogger(&c.Log)
 
 	mux := http.NewServeMux()
 

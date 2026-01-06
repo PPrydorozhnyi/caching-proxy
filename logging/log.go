@@ -14,7 +14,7 @@ import (
 // check fo more options https://github.com/rs/zerolog
 // todo add Integration with net/http
 // todo add tracing hook
-func InitGlobalLogger(cfg *config.ConfLog) {
+func ConfigureLogger(cfg *config.ConfLog) {
 
 	// UNIX Time is faster and smaller than most timestamps
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
