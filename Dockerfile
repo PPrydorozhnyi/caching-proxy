@@ -4,11 +4,11 @@ FROM golang:1.25 AS builder
 WORKDIR /app
 
 # Copy the Go module files and download dependencies
-COPY ./src/go.* ./
+COPY go.* ./
 RUN go mod download
 
 # Copy the application source code and build the binary
-COPY ./src ./
+COPY . ./
 
 # Build sources
 #todo optimize build with flags like -ldflags '-w -s' -a

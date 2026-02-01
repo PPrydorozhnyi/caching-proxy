@@ -19,16 +19,13 @@ func ConfigureLogger(cfg *config.ConfLog) {
 	// UNIX Time is faster and smaller than most timestamps
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	switch cfg.Level {
-	case "debug":
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	case "info":
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	case "warn":
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	case "error":
-		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	level, err := zerolog.ParseLevel(cfg.Level)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to parse log level. Using default level: info")
+		level = zerolog.InfoLevel
 	}
+
+	zerolog.SetGlobalLevel(level)
 
 	if !cfg.Structured {
 		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
