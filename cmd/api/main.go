@@ -2,10 +2,16 @@ package main
 
 import (
 	"caching-proxy/config"
+	"caching-proxy/handler"
 	"caching-proxy/logging"
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -25,22 +31,27 @@ func main() {
 		IdleTimeout:  c.Server.Timeout.Idle,
 	}
 
-	mux.HandleFunc("/", indexHandler)
+	handler.RegisterHandlers(mux)
 
-	log.Info().Msgf("Starting server on port %d", c.Server.Port)
+	go func() {
+		log.Info().Msgf("Starting server on port %d", c.Server.Port)
 
-	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal().Err(err).Msg("Failed to start server")
-	}
-}
+		if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Err(err).Msg("Failed to start server")
+		}
+	}()
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Info().Msg("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatal().Err(err).Msg("Failed to shutdown server")
 	}
-	_, err := fmt.Fprint(w, "Hello, World!")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+
+	log.Info().Msg("Server stopped")
 }
